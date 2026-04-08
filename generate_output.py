@@ -4,34 +4,99 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 import json, datetime, calendar, re
 
-WBS_MAP = {
-    "APEL":        "APEL-SSA-TAR-ATA-HIRATE-MC-199",
-    "BFHL":        "BFHL-SSA-TAR-ATA-HIRATE-MC-210",
-    "BWHPL":       "BWHPL-SSA-TAR-ATA-HIRATE-MC-340",
-    "DATL":        "DATL-SSA-TAR-ATA-HIRATE-MC-198",
-    "FRHL_HIRATE": "FRHL-SSA-TAR-ATA-HIRATE-MC-197",
-    "FRHL_ENEXCO": "FRHL-SSA-TAR-ASA-E. NSV ANALYSIS-MC-147",
-    "GAEPL":       "GAPEL-SSA-TAR-ATA-HIRATE-MC-200",
-    "JMTPL":       "JMTL-SSA-TAR-ATA-HIRATE-MC-194",
-    "KETPL":       "KETL-SSA-TAR-ATA-HIRATE-MC-196",
-    "KMTPL":       "KMTL-SSA-TAR-ATA-HIRATE-MC-195",
-    "KTIPL":       "KTIPL-SSA-TAR-ATA-HIRATE-MC-348",
-    "MBEL":        "MBEL-SSA-TAR-ATA-HIRATE-MC-192",
-    "MHPL":        "MHPL-SSA-TAR-ATA-HIRATE-MC-346",
-    "MKTL":        "MKTL-SSA-TAR-ATA-HIRATE-MC-191",
-    "MSHP":        "MSHPL-SSA-TAR-ATA-HIRATE-MC-343",
-    "NAM":         "NAMEL-SSA-TAR-ATA-HIRATE-MC-400",
-    "NDEPL":       "NDEPL-SSA-TAR-ATA-HIRATE-MC-190",
-    "NKTPL":       "NKTL-SSA-TAR-ATA-HIRATE-MC-189",
-    "SIPL":        "SIPL-SSA-TAR-ATA-HIRATE-MC-350",
-    "SMTPL":       "SMTL-SSA-TAR-ATA-HIRATE-MC-188",
-    "SPPL":        "SPPL-SSA-TAR-ATA-HIRATE-MC-352",
-    "WVEL":        "WVEPL-SSA-TAR-ATA-HIRATE-MC-193",
-    "WUPTL":       "WUPTL-SSA-TAR-ATA-HIRATE-MC-187",
-    "Lightstorm":  "LIGHTSTORM-SSA-ATMS-INST-LGS-01-MC-472",
+# HIRATE WBS codes mapped by project code
+WBS_HIRATE = {
+    "APEL":   "APEL-SSA-TAR-ATA-HIRATE-MC-199",
+    "BFHL":   "BFHL-SSA-TAR-ATA-HIRATE-MC-210",
+    "BWHPL":  "BWHPL-SSA-TAR-ATA-HIRATE-MC-340",
+    "DATL":   "DATL-SSA-TAR-ATA-HIRATE-MC-198",
+    "FRHL":   "FRHL-SSA-TAR-ATA-HIRATE-MC-197",
+    "GAPEL":  "GAPEL-SSA-TAR-ATA-HIRATE-MC-200",
+    "JMTL":   "JMTL-SSA-TAR-ATA-HIRATE-MC-194",
+    "KETL":   "KETL-SSA-TAR-ATA-HIRATE-MC-196",
+    "KMTL":   "KMTL-SSA-TAR-ATA-HIRATE-MC-195",
+    "KTIPL":  "KTIPL-SSA-TAR-ATA-HIRATE-MC-348",
+    "MBEL":   "MBEL-SSA-TAR-ATA-HIRATE-MC-192",
+    "MHPL":   "MHPL-SSA-TAR-ATA-HIRATE-MC-346",
+    "MKTL":   "MKTL-SSA-TAR-ATA-HIRATE-MC-191",
+    "MSHPL":  "MSHPL-SSA-TAR-ATA-HIRATE-MC-343",
+    "NAMEL":  "NAMEL-SSA-TAR-ATA-HIRATE-MC-400",
+    "NDEPL":  "NDEPL-SSA-TAR-ATA-HIRATE-MC-190",
+    "NKTL":   "NKTL-SSA-TAR-ATA-HIRATE-MC-189",
+    "SIPL":   "SIPL-SSA-TAR-ATA-HIRATE-MC-350",
+    "SMTL":   "SMTL-SSA-TAR-ATA-HIRATE-MC-188",
+    "SPPL":   "SPPL-SSA-TAR-ATA-HIRATE-MC-352",
+    "WVEPL":  "WVEPL-SSA-TAR-ATA-HIRATE-MC-193",
+    "WUPTL":  "WUPTL-SSA-TAR-ATA-HIRATE-MC-187",
+    "Lightstorm": "LIGHTSTORM-SSA-ATMS-INST-LGS-01-MC-472",
 }
 
+# ENEXCO WBS codes mapped by project code
+WBS_ENEXCO = {
+    "APEL":   "APEL-SSA-TAR-ASA-E. NSV Analysis-MC-139",
+    "BFHL":   "BFHL-SSA-TAR-ASA-E. NSV Analysis-MC-385",
+    "BWHPL":  "BWHPL-SSA-TAR-ASA-E. NSV Analysis-MC-341",
+    "DATL":   "DATL-SSA-TAR-ASA-E. NSV Analysis-MC-148",
+    "FRHL":   "FRHL-SSA-TAR-ASA-E. NSV Analysis-MC-147",
+    "GAEPL":  "GAEPL-SSA-TAR-ASA-E. NSV Analysis_MC_232",
+    "JMTL":   "JMTL-SSA-TAR-ASA-E. NSV Analysis-MC-146",
+    "KETL":   "KETL-SSA-TAR-ASA-E. NSV Analysis-MC-141",
+    "KMTL":   "KMTL-SSA-TAR-ASA-E. NSV Analysis-MC-149",
+    "KTIPL":  "KTIPL-SSA-TAR-ASA-E. NSV Analysis-MC-347",
+    "MBEL":   "MBEL-SSA-TAR-ASA-E. NSV Analysis-MC-145",
+    "MHPL":   "MHPL-SSA-TAR-ASA-E. NSV Analysis-MC-345",
+    "MKTL":   "MKTL-SSA-TAR-ASA-E. NSV Analysis-MC-140",
+    "MSHPL":  "MSHPL-SSA-TAR-ASA-E. NSV Analysis-MC-344",
+    "NAMEL":  "NAMEL-SSA-TAR-ASA-E. NSV Analysis-MC-152",
+    "NDEPL":  "NDEPL-SSA-TAR-ASA-E. NSV Analysis-MC-138",
+    "NKTL":   "NKTL-SSA-TAR-ASA-E. NSV Analysis-MC-143",
+    "SIPL":   "SIPL-SSA-TAR-ASA-E. NSV Analysis-MC-349",
+    "SMTL":   "SMTL-SSA-TAR-ASA-E. NSV Analysis-MC-142",
+    "SPPL":   "SPPL-SSA-TAR-ASA-E. NSV Analysis-MC-351",
+    "WVEL":   "WVEL-SSA-TAR-ASA-E. NSV Analysis-MC-150",
+    "WUPTL":  "WUPTL-SSA-TAR-ASA-E. NSV Analysis-MC-144",
+    "WMPTL":  "WMPTL-SSA-TAR-ASA-E. NSV Analysis-MC-466",
+}
+
+# Aliases for project codes (various spellings used in input)
+PROJECT_ALIASES = {
+    "JMTPL":  "JMTL",
+    "KETPL":  "KETL",
+    "KMTPL":  "KMTL",
+    "NKTPL":  "NKTL",
+    "SMTPL":  "SMTL",
+    "GAEPL":  "GAPEL",
+    "MSHP":   "MSHPL",
+    "NAM":    "NAMEL",
+    "NDEPL":  "NDEPL",
+    "SIPL":   "SIPL",
+    "SPPL":   "SPPL",
+    "WVEL":   "WVEPL",
+}
+
+def get_wbs_code(proj_code, is_hirate, is_enexco):
+    """Return the appropriate WBS code based on project code and assignment type."""
+    # Normalize the project code
+    normalized = PROJECT_ALIASES.get(proj_code, proj_code)
+    
+    # Special case for Lightstorm
+    if proj_code == 'Lightstorm' or normalized == 'Lightstorm':
+        return WBS_HIRATE.get('Lightstorm', proj_code)
+    
+    # If project is assigned to ENEXCO, use ENEXCO WBS
+    if is_enexco and normalized in WBS_ENEXCO:
+        return WBS_ENEXCO[normalized]
+    
+    # Otherwise use HIRATE WBS
+    if normalized in WBS_HIRATE:
+        return WBS_HIRATE[normalized]
+    
+    # Fallback to project code if not found
+    return proj_code
+
+# Combined WBS column order for timesheet (HIRATE + ENEXCO + Lightstorm)
 WBS_COLUMN_ORDER = [
+    # HIRATE WBS codes
     "APEL-SSA-TAR-ATA-HIRATE-MC-199",
     "BFHL-SSA-TAR-ATA-HIRATE-MC-210",
     "BWHPL-SSA-TAR-ATA-HIRATE-MC-340",
@@ -54,7 +119,31 @@ WBS_COLUMN_ORDER = [
     "SPPL-SSA-TAR-ATA-HIRATE-MC-352",
     "WVEPL-SSA-TAR-ATA-HIRATE-MC-193",
     "WUPTL-SSA-TAR-ATA-HIRATE-MC-187",
-    "FRHL-SSA-TAR-ASA-E. NSV ANALYSIS-MC-147",
+    # ENEXCO WBS codes
+    "APEL-SSA-TAR-ASA-E. NSV Analysis-MC-139",
+    "BFHL-SSA-TAR-ASA-E. NSV Analysis-MC-385",
+    "BWHPL-SSA-TAR-ASA-E. NSV Analysis-MC-341",
+    "DATL-SSA-TAR-ASA-E. NSV Analysis-MC-148",
+    "FRHL-SSA-TAR-ASA-E. NSV Analysis-MC-147",
+    "GAEPL-SSA-TAR-ASA-E. NSV Analysis_MC_232",
+    "JMTL-SSA-TAR-ASA-E. NSV Analysis-MC-146",
+    "KETL-SSA-TAR-ASA-E. NSV Analysis-MC-141",
+    "KMTL-SSA-TAR-ASA-E. NSV Analysis-MC-149",
+    "KTIPL-SSA-TAR-ASA-E. NSV Analysis-MC-347",
+    "MBEL-SSA-TAR-ASA-E. NSV Analysis-MC-145",
+    "MHPL-SSA-TAR-ASA-E. NSV Analysis-MC-345",
+    "MKTL-SSA-TAR-ASA-E. NSV Analysis-MC-140",
+    "MSHPL-SSA-TAR-ASA-E. NSV Analysis-MC-344",
+    "NAMEL-SSA-TAR-ASA-E. NSV Analysis-MC-152",
+    "NDEPL-SSA-TAR-ASA-E. NSV Analysis-MC-138",
+    "NKTL-SSA-TAR-ASA-E. NSV Analysis-MC-143",
+    "SIPL-SSA-TAR-ASA-E. NSV Analysis-MC-349",
+    "SMTL-SSA-TAR-ASA-E. NSV Analysis-MC-142",
+    "SPPL-SSA-TAR-ASA-E. NSV Analysis-MC-351",
+    "WVEL-SSA-TAR-ASA-E. NSV Analysis-MC-150",
+    "WUPTL-SSA-TAR-ASA-E. NSV Analysis-MC-144",
+    "WMPTL-SSA-TAR-ASA-E. NSV Analysis-MC-466",
+    # Lightstorm
     "LIGHTSTORM-SSA-ATMS-INST-LGS-01-MC-472",
 ]
 
@@ -65,8 +154,33 @@ def _s(row, col):
     v = row.get(col, '')
     return '' if pd.isna(v) or str(v).strip() in ('nan','NaN','') else str(v).strip()
 
+def get_all_sheet_names():
+    """Return all sheet names from the workbook."""
+    import openpyxl
+    wb = openpyxl.load_workbook('emp_data_input.xlsx', read_only=True, data_only=True)
+    names = wb.sheetnames
+    wb.close()
+    return names
+
+def resolve_sheet(all_names, candidates, fallback_index=0):
+    """Return the actual sheet name matching any candidate (case+space insensitive)."""
+    norm_map = {n.strip().lower().replace(' ', ''): n for n in all_names}
+    for c in candidates:
+        key = c.strip().lower().replace(' ', '')
+        if key in norm_map:
+            return norm_map[key]
+    # Last resort: use sheet at fallback_index
+    if fallback_index < len(all_names):
+        return all_names[fallback_index]
+    return all_names[0]
+
 def parse_input():
-    raw = pd.read_excel('emp_data_input.xlsx', sheet_name='Sheet1', header=None)
+    all_sheets = get_all_sheet_names()
+    sheet1_name = resolve_sheet(all_sheets,
+        ['Sheet1', 'sheet1', 'Attendance', 'Input', 'Data', 'EmpData'],
+        fallback_index=0)
+    print(f"[INFO] Using sheet '{sheet1_name}' as Sheet1 (attendance data)")
+    raw = pd.read_excel('emp_data_input.xlsx', sheet_name=sheet1_name, header=None)
     hirate_projects, enexco_projects, lightstorm_projects = set(), set(), set()
     for i in range(2, 23):
         code = raw.iloc[i, 0]
@@ -91,22 +205,26 @@ def parse_input():
             if pd.notna(proj_code) and pd.notna(proj_days):
                 code = str(proj_code).strip()
                 days = int(proj_days)
-                if code in lightstorm_projects or code == 'Lightstorm':
-                    wbs = WBS_MAP['Lightstorm']
-                elif code == 'FRHL' and code in enexco_projects:
-                    wbs = WBS_MAP['FRHL_ENEXCO']
-                elif code == 'FRHL':
-                    wbs = WBS_MAP['FRHL_HIRATE']
-                elif code in WBS_MAP:
-                    wbs = WBS_MAP[code]
-                else:
-                    wbs = code
+                # Determine if this project is for ENEXCO or HIRATE
+                is_hirate = code in hirate_projects or (code in PROJECT_ALIASES and PROJECT_ALIASES[code] in hirate_projects)
+                is_enexco = code in enexco_projects or (code in PROJECT_ALIASES and PROJECT_ALIASES[code] in enexco_projects)
+                is_lightstorm = code in lightstorm_projects or code == 'Lightstorm'
+                
+                # Get the appropriate WBS code
+                wbs = get_wbs_code(code, is_hirate, is_enexco)
+                
                 projects.append({'code': code, 'days': days, 'wbs': wbs})
         employees.append({'name': name, 'attendance': attendance, 'projects': projects})
     return employees
 
 def parse_sheet2():
-    df = pd.read_excel('emp_data_input.xlsx', sheet_name='Sheet2', dtype=str)
+    all_sheets = get_all_sheet_names()
+    sheet2_name = resolve_sheet(all_sheets,
+        ['Sheet2', 'sheet2', 'EmployeeDetails', 'Employee Details', 'BankDetails',
+         'Bank Details', 'Details', 'Providers', 'ServiceProviders'],
+        fallback_index=1)
+    print(f"[INFO] Using sheet '{sheet2_name}' as Sheet2 (employee/bank details)")
+    df = pd.read_excel('emp_data_input.xlsx', sheet_name=sheet2_name, dtype=str)
     records = {}
     for _, row in df.iterrows():
         name = str(row['Service Provider']).strip()
