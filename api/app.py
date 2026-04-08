@@ -1,9 +1,13 @@
+import sys
+import os
+
+# Add the api directory to Python path for Vercel
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, request, render_template_string, send_file, jsonify
 import io
 import zipfile
 import json
-import os
-import base64
 
 # Check if running on Vercel
 IS_VERCEL = os.environ.get('VERCEL', False)
