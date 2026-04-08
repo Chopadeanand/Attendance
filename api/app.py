@@ -102,11 +102,7 @@ HTML_TEMPLATE = """
         .btn:hover { background-color: #007b63; }
         .btn:disabled { background-color: #ccc; cursor: not-allowed; }
 
-        /* Progress */
-        #progress-wrap {
-            display: none;
-            margin-top: 20px;
-        }
+        #progress-wrap { display: none; margin-top: 20px; }
         .progress-bar-bg {
             background: #eee;
             border-radius: 999px;
@@ -122,23 +118,11 @@ HTML_TEMPLATE = """
             transition: width 0.5s ease;
             animation: pulse 1.5s ease-in-out infinite;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0.7; }
-        }
-        .progress-label {
-            font-size: 13px;
-            color: #666;
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .progress-label { font-size: 13px; color: #666; }
 
-        /* Status */
-        #status {
-            margin-top: 16px;
-            font-size: 14px;
-            color: #333;
-        }
+        #status { margin-top: 16px; font-size: 14px; color: #333; }
 
-        /* Download section */
         #download-section {
             display: none;
             margin-top: 28px;
@@ -176,10 +160,7 @@ HTML_TEMPLATE = """
             transform: translateY(-1px);
             box-shadow: 0 3px 10px rgba(0,149,120,0.15);
         }
-        .download-btn .file-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-        }
+        .download-btn .file-icon { font-size: 24px; flex-shrink: 0; }
         .download-btn .file-info { flex: 1; }
         .download-btn .file-name { font-weight: 600; }
         .download-btn .file-desc { font-size: 12px; color: #888; margin-top: 2px; }
@@ -209,7 +190,6 @@ HTML_TEMPLATE = """
 
         <div id="status"></div>
 
-        <!-- Download Section -->
         <div id="download-section">
             <h3>✅ Files Ready — Download Below</h3>
             <div class="download-grid" id="downloadGrid">
@@ -242,26 +222,21 @@ HTML_TEMPLATE = """
     </div>
 
     <script>
-        const dropZone   = document.getElementById('dropZone');
-        const fileInput  = document.getElementById('fileInput');
-        const prompt     = document.querySelector('.drop-zone__prompt');
-        const submitBtn  = document.getElementById('submitBtn');
-        const statusDiv  = document.getElementById('status');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusDiv = document.getElementById('status');
         const progressWrap = document.getElementById('progress-wrap');
-        const progressBar  = document.getElementById('progressBar');
+        const progressBar = document.getElementById('progressBar');
         const progressLabel = document.getElementById('progressLabel');
         const downloadSection = document.getElementById('download-section');
 
-        // Drop zone click
         dropZone.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length) updateThumbnail(fileInput.files[0]);
         });
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drop-zone--over');
-        });
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drop-zone--over'); });
         ['dragleave', 'dragend'].forEach(t => {
             dropZone.addEventListener(t, () => dropZone.classList.remove('drop-zone--over'));
         });
@@ -275,48 +250,11 @@ HTML_TEMPLATE = """
         });
 
         function updateThumbnail(file) {
-            prompt.textContent = '✅ ' + file.name;
+            document.querySelector('.drop-zone__prompt').textContent = '✅ ' + file.name;
             dropZone.classList.add('drop-zone--has-file');
             submitBtn.disabled = false;
         }
 
-        // Fake progress animation while waiting
-        let progressInterval = null;
-        function startProgress() {
-            progressWrap.style.display = 'block';
-            downloadSection.style.display = 'none';
-            let pct = 0;
-            const steps = [
-                { to: 20, label: 'Reading Excel data...' },
-                { to: 45, label: 'Generating timesheet & JSON...' },
-                { to: 70, label: 'Building Word invoices...' },
-                { to: 90, label: 'Creating individual PDFs...' },
-                { to: 95, label: 'Finalising outputs...' },
-            ];
-            let stepIdx = 0;
-            progressInterval = setInterval(() => {
-                if (stepIdx < steps.length && pct >= (stepIdx > 0 ? steps[stepIdx-1].to : 0)) {
-                    progressLabel.textContent = steps[stepIdx].label;
-                    stepIdx++;
-                }
-                if (pct < 95) { pct += 0.8; }
-                progressBar.style.width = pct + '%';
-            }, 300);
-        }
-
-        function stopProgress(success) {
-            clearInterval(progressInterval);
-            progressBar.style.width = success ? '100%' : '0%';
-            progressBar.style.animation = 'none';
-            if (success) {
-                progressBar.style.background = 'linear-gradient(90deg,#009578,#00c49a)';
-            } else {
-                progressBar.style.background = '#e74c3c';
-            }
-            progressLabel.textContent = success ? 'Done!' : 'Failed.';
-        }
-
-        // Form submit
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData();
@@ -325,22 +263,23 @@ HTML_TEMPLATE = """
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing...';
             statusDiv.innerHTML = '';
-            startProgress();
+            progressWrap.style.display = 'block';
 
             try {
                 const response = await fetch('/upload', { method: 'POST', body: formData });
                 const result = await response.text();
 
                 if (response.ok) {
-                    stopProgress(true);
+                    progressBar.style.width = '100%';
+                    progressLabel.textContent = 'Done!';
                     statusDiv.innerHTML = '';
                     downloadSection.style.display = 'block';
                 } else {
-                    stopProgress(false);
+                    progressBar.style.width = '0%';
+                    progressBar.style.background = '#e74c3c';
                     statusDiv.innerHTML = '<span style="color:red">❌ Error: ' + result + '</span>';
                 }
             } catch (err) {
-                stopProgress(false);
                 statusDiv.innerHTML = '<span style="color:red">❌ Network Error.</span>';
             } finally {
                 submitBtn.textContent = '⚙️ Process & Generate Files';
@@ -352,13 +291,10 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# ── Route: Main UI ────────────────────────────────────────────────────────────
 @app.route('/')
 def index():
     return render_template_string(HTML_TEMPLATE)
 
-
-# ── Route: Upload & Process ───────────────────────────────────────────────────
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'excel_file' not in request.files:
@@ -369,27 +305,20 @@ def upload_file():
         return "No selected file", 400
 
     try:
-        # Read file content into memory
         file_content = file.read()
         
-        # Import processing modules
         from generate_output import process_employee_data
         from generate_docx_invoices import generate_docx_in_memory
         from generate_pdf_invoices import generate_all_pdfs_in_memory
         
-        # Process employee data from Excel
         employees, xlsx_buffer = process_employee_data(file_content)
         
         if not employees:
             return "No employee data found in the Excel file", 400
         
-        # Generate DOCX in memory
         docx_buffer = generate_docx_in_memory(employees)
-        
-        # Generate PDFs in memory
         pdf_buffers = generate_all_pdfs_in_memory(employees)
         
-        # Store in memory for download (Vercel compatible)
         processed_data['xlsx_buffer'] = xlsx_buffer
         processed_data['docx_buffer'] = docx_buffer
         processed_data['pdf_buffers'] = pdf_buffers
@@ -403,8 +332,6 @@ def upload_file():
         import traceback
         return f"An error occurred: {str(e)}\n{traceback.format_exc()}", 500
 
-
-# ── Route: Download Excel ─────────────────────────────────────────────────────
 @app.route('/download/xlsx')
 def download_xlsx():
     if not processed_data['ready'] or processed_data['xlsx_buffer'] is None:
@@ -420,8 +347,6 @@ def download_xlsx():
         download_name='Salary_TimeSheet_Output.xlsx'
     )
 
-
-# ── Route: Download DOCX ──────────────────────────────────────────────────────
 @app.route('/download/docx')
 def download_docx():
     if not processed_data['ready'] or processed_data['docx_buffer'] is None:
@@ -437,14 +362,11 @@ def download_docx():
         download_name='Employee_Invoices.docx'
     )
 
-
-# ── Route: Download all PDFs as ZIP ──────────────────────────────────────────
 @app.route('/download/pdfs_zip')
 def download_pdfs_zip():
     if not processed_data['ready'] or not processed_data['pdf_buffers']:
         return "No PDF files available. Please process a file first.", 404
 
-    # Build ZIP in memory
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
         for pdf_info in processed_data['pdf_buffers']:
@@ -457,7 +379,6 @@ def download_pdfs_zip():
         as_attachment=True,
         download_name='Individual_PDF_Invoices.zip'
     )
-
 
 if __name__ == '__main__':
     print("Starting UI. Open http://127.0.0.1:5000 in your browser.")
