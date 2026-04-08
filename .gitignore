@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Node (if any)
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large data files (keep input samples if needed)
+*.xlsx
+*.docx
+*.pdf
+
+# Generated files
+emp_data.json
+Salary_TimeSheet_Output_new.xlsx
+Employee_Invoices_new.docx
+individual_pdfs/
+
+# Vercel
+.vercel/
