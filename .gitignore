@@ -33,3 +33,5 @@ individual_pdfs/
 
 # Vercel
 .vercel/
+.vercel
+.env*.local
